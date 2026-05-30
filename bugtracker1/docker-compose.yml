@@ -1,0 +1,22 @@
+services:
+  bugtracker:
+    build: ./app
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: [ "CMD", "curl", "-sf", "http://localhost:3000/health" ]
+      interval: 100s
+      timeout: 5s
+      retries: 3
+    environment:
+      - FLAG=THEM?!CTF{0h_n0_1_th0ught_th3_vuln_w4s_sql1_l0l}
+      - ADMIN_PASSWORD=1ts_c0nf1rm3d_th4t_p4v3l_1s_g4y_sup3r_s3cr3t_p4ssw0rd
+      - PORT=3000
+      - NODE_ENV=production
+
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

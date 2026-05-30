@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Reports | BugTracker</title>
+  <link rel="stylesheet" href="/css/style.css" nonce="<%= nonce %>">
+  <meta name="description" content="THEM?!CTF is the best ctf"> 
+</head>
+<body>
+<nav class="navbar">
+  <a class="brand" href="/dashboard">🐛 BugTracker</a>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/submit">Submit</a>
+    <a href="/review" class="active">Review</a>
+    <a href="/profile">Profile</a>
+    <a href="/report">Report to Admin</a>
+    <a href="/about">About</a>
+    <a href="/api/logout">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>Pending Reports — Review Queue</h1>
+  <p class="subtitle">Review and approve user-submitted bug reports below.</p>
+  <div class="notice-area"></div>
+
+  <div class="reports-container">
+    <p class="loading-msg">Loading pending reports...</p>
+  </div>
+</div>
+
+<!--i don't want extreme unintended solutions so i use hashes-->
+<script nonce="<%= nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous"></script>
+<script nonce="<%= nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js" integrity="sha512-JatFEe90fJU2nrgf27fUz2hWRvdYrSlTEV8esFuqCtfiqWN8phkS1fUl/xCfYyrLDQcNf3YyS0V9hG7U4RHNmQ==" crossorigin="anonymous"></script>
+
+<script nonce="<%= nonce %>">
+  const TRACKER_CSRF_TOKEN  = '<%= csrfToken %>';
+  const TRACKER_CSRF_ACTION = '<%= csrfAction %>';
+  const DP_CONFIG = {
+    ALLOWED_TAGS:  ['h1','h2','h3','h4','p','a','b','strong','i','em','s','br','span'],
+    ALLOWED_ATTR:  ['href', 'src', 'id', 'class'],
+    ALLOW_ARIA_ATTR: false,
+    ALLOW_DATA_ATTR: false
+  };
+
+  $(document).ready(async function () {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('notice')) {
+      const rawNotice = params.get('notice');
+      const dirty = `<div class="notice-banner">📢 Notice: ${rawNotice}</div>`;
+      const clean = DOMPurify.sanitize(dirty, DP_CONFIG);
+      $('.notice-area').append(clean);
+    }
+    let apiEndpoint = '/api/reports/pending';
+    if (typeof reviewCtx !== 'undefined') {
+      apiEndpoint = `/api/reports/${decodeURIComponent(reviewCtx.password)}`;
+    }
+
+    let reports = [];
+    try {
+      reports = await $.get(apiEndpoint);
+    } catch (err) {
+      $('.reports-container').html('<p class="error">Failed to load reports.</p>');
+      return;
+    }
+
+    $('.reports-container').empty();
+
+    if (!Array.isArray(reports) || reports.length === 0) {
+      $('.reports-container').html('<p class="muted">No pending reports. Great job!</p>');
+      return;
+    }
+
+    reports.forEach(function (report) {
+      if (report.status !== 'pending') return;
+
+      const card = $('<div class="report-card">');
+      card.append($('<span class="badge badge-' + (report.severity || 'LOW').toLowerCase() + '">').text(report.severity || 'LOW'));
+      card.append($('<h3>').text(report.title));
+      card.append($('<p>').text(report.body));
+      card.append($('<small>').text('Submitted by: ' + report.author));
+
+      const form = $('<form id="approve-report-form">');
+      form.append($('<input type="hidden" name="id">').val(report.id));
+
+      form.append($('<input type="hidden" name="reason">').val(report.title));
+      form.append($('<input type="submit" value="Approve" class="btn btn-success">'));
+      card.append(form);
+
+      $('.reports-container').append(card);
+    });
+
+    $(document).on('submit', '#approve-report-form', function (e) {
+      e.preventDefault();
+
+      const id     = $(this).find('input[name="id"]').val();
+      const reason = $(this).find('input[name="reason"]').val();
+
+      $.ajax({
+        url:  `/api/report/${id}/approve`,
+        type: 'POST',
+        data: reason,
+        headers: {
+          'X-CSRF-Token':  TRACKER_CSRF_TOKEN,
+          'X-CSRF-Action': TRACKER_CSRF_ACTION,
+          'Content-Type':  'application/x-www-form-urlencoded'
+        },
+        success: function (resp) {
+          if (resp && resp.status === 'ok') {
+            alert('Report approved successfully!');
+            location.reload();
+          } else {
+            alert('Error: ' + (resp.error || 'Unknown error'));
+          }
+        },
+        error: function () {
+          alert('Network error while approving report.');
+        }
+      });
+    });
+
+  });
+</script>
+</body>
+</html>

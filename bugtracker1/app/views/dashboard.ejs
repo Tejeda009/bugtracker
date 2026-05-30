@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard | BugTracker</title>
+  <link rel="stylesheet" href="/css/style.css" nonce="<%= nonce %>">
+  <meta name="description" content="THEM?!CTF is the best ctf"> 
+  <!-- debug: admin panel at /api/v2/admin/panel (just kidding, stop looking here) -->
+</head>
+<body>
+<nav class="navbar">
+  <a class="brand" href="/dashboard">🐛 BugTracker</a>
+  <div class="nav-links">
+    <a href="/dashboard" class="active">Dashboard</a>
+    <a href="/submit">Submit</a>
+    <% if (role !== 'reporter') { %><a href="/review">Review</a><% } %>
+    <a href="/profile">Profile</a>
+    <a href="/report">Report to Admin</a>
+    <a href="/about">About</a>
+    <a href="/api/logout">Logout</a>
+  </div>
+</nav>
+<div class="container">
+  <h1>Bug Report Dashboard</h1>
+  <p>Welcome, <strong><%= username %></strong> — role: <span class="badge badge-<%= role %>"><%= role %></span></p>
+  <div id="reports-list"><p class="loading-msg">Loading reports...</p></div>
+</div>
+<script nonce="<%= nonce %>">
+(async function () {
+  const resp = await fetch('/api/dashboard');
+  const reports = await resp.json();
+  const container = document.getElementById('reports-list');
+  if (!Array.isArray(reports) || reports.length === 0) {
+    container.innerHTML = '<p class="muted">No approved reports yet.</p>';
+    return;
+  }
+  container.innerHTML = '';
+  reports.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'report-card';
+    div.innerHTML = `
+      <span class="badge badge-${(r.severity||'low').toLowerCase()}">${r.severity}</span>
+      <span class="badge badge-vis">${r.visibility}</span>
+      <h3>${escHtml(r.title)}</h3>
+      <p>${escHtml(r.body)}</p>
+      <small>Author: ${escHtml(r.author)}</small>
+    `;
+    container.appendChild(div);
+  });
+  function escHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+})();
+</script>
+</body>
+</html>

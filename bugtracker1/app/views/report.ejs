@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Report to Admin | BugTracker</title>
+  <link rel="stylesheet" href="/css/style.css" nonce="<%= nonce %>">
+  <meta name="description" content="THEM?!CTF is the best ctf"> 
+</head>
+<body>
+<nav class="navbar">
+  <a class="brand" href="/dashboard">🐛 BugTracker</a>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/submit">Submit</a>
+    <a href="/profile">Profile</a>
+    <a href="/report" class="active">Report to Admin</a>
+    <a href="/about">About</a>
+    <a href="/api/logout">Logout</a>
+  </div>
+</nav>
+<div class="container">
+  <h1>Report to Admin</h1>
+  <div id="msg" class="msg hidden"></div>
+  <div class="form-group">
+    <label>Review URL</label>
+    <input type="text" id="url" placeholder="http://localhost:3000/review?notice=...">
+  </div>
+  <button class="btn btn-primary">Send to Admin</button>
+</div>
+<script nonce="<%= nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous"></script>
+<script nonce="<%= nonce %>">
+document.querySelector('button').addEventListener('click', () => {
+    // start solver without blocking UI immediately
+    setTimeout(sendReport, 10);
+});
+
+function solvePowAndSend(url, btn, msg) {
+  if (typeof CryptoJS === 'undefined') {
+    msg.textContent = 'Failed to load crypto library. Disable any script blockers and refresh.';
+    msg.className = 'msg error';
+    btn.disabled = false;
+    btn.textContent = 'Send to Admin';
+    return;
+  }
+
+  const salt = '<%= powSalt %>';
+  const target = '0000';
+  let nonce = 0;
+
+  function chunk() {
+    try {
+      const end = nonce + 8000;
+      for (; nonce < end; nonce++) {
+          const hash = CryptoJS.SHA256(salt + String(nonce)).toString();
+          if (hash.startsWith(target)) {
+              console.log('[pow] solved: nonce=' + nonce + ' hash=' + hash);
+              executeFetch(url, nonce, btn, msg);
+              return;
+          }
+      }
+      setTimeout(chunk, 0);
+    } catch (e) {
+      console.error('[pow] error:', e);
+      msg.textContent = '❌ PoW error: ' + e.message;
+      msg.className = 'msg error';
+      btn.disabled = false;
+      btn.textContent = 'Send to Admin';
+    }
+  }
+  chunk();
+}
+
+async function executeFetch(url, powNonce, btn, msg) {
+  try {
+      const resp = await fetch('/api/submit-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `url=${encodeURIComponent(url)}&powNonce=${encodeURIComponent(powNonce)}`
+      });
+      const data = await resp.json();
+      msg.textContent = data.status === 'ok' ? '✅ Admin visited the URL.' : ('❌ ' + (data.error || 'Error'));
+      msg.className = 'msg ' + (data.status === 'ok' ? 'success' : 'error');
+  } catch (err) {
+      msg.textContent = 'Network error';
+      msg.className = 'msg error';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Send to Admin';
+}
+
+function sendReport() {
+  const url = document.getElementById('url').value;
+  const btn = document.querySelector('button');
+  btn.disabled = true;
+  btn.textContent = 'Computing PoW... (protecting admin bot)';
+  
+  const msg = document.getElementById('msg');
+  msg.className = 'msg hidden';
+  
+  solvePowAndSend(url, btn, msg);
+}
+</script>
+</body>
+</html>

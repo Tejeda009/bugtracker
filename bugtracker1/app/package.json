@@ -1,0 +1,18 @@
+{
+  "name": "bugtracker",
+  "version": "1.0.0",
+  "description": "We just deployed our internal bug tracking system — it's still in development but we needed it live ASAP. If you find a bug submit a report pls.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "bcrypt": "6.0.0",
+    "ejs": "3.1.10",
+    "express": "^4.22.2",
+    "express-rate-limit": "7.3.1",
+    "express-session": "^1.19.0",
+    "playwright": "^1.60.0",
+    "sqlite3": "^6.0.1"
+  }
+}

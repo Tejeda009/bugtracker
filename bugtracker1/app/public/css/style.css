@@ -1,0 +1,133 @@
+/*CSS courtesy of Claude, as far as i know it doesn't affect the challenge*/
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #238636;
+  --accent-hover: #2ea043;
+  --danger: #da3633;
+  --warning: #d29922;
+  --info: #1f6feb;
+  --radius: 8px;
+  --font: 'Segoe UI', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Navbar ── */
+.navbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: .75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { font-size: 1.2rem; font-weight: 700; color: var(--text); text-decoration: none; }
+.nav-links a { color: var(--muted); text-decoration: none; margin-left: 1.5rem; font-size: .9rem; }
+.nav-links a:hover, .nav-links a.active { color: var(--text); }
+
+/* ── Container ── */
+.container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+h1 { font-size: 1.8rem; margin-bottom: .5rem; }
+h2 { font-size: 1.3rem; margin: 1.5rem 0 .5rem; }
+.subtitle { color: var(--muted); margin-bottom: 1.5rem; }
+
+/* ── Cards ── */
+.card, .report-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.report-card h3 { margin: .5rem 0 .25rem; font-size: 1.1rem; }
+.report-card p  { color: var(--muted); margin-bottom: .5rem; font-size: .95rem; }
+.report-card small { color: var(--muted); font-size: .8rem; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-block;
+  padding: .15rem .55rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: .25rem;
+}
+.badge-low      { background: #1c3a2a; color: #3fb950; }
+.badge-medium   { background: #3a2c1a; color: #d29922; }
+.badge-high     { background: #3a1f1f; color: #f85149; }
+.badge-critical { background: #2d0f0f; color: #ff7b72; border: 1px solid #da3633; }
+.badge-reporter { background: #1c2d3a; color: #79c0ff; }
+.badge-editor   { background: #2a1f3a; color: #d2a8ff; }
+.badge-admin    { background: #3a2c00; color: #e3b341; }
+.badge-vis      { background: #21262d; color: var(--muted); }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-block;
+  padding: .5rem 1.25rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: .95rem;
+  font-weight: 600;
+  transition: background .15s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-success { background: #238636; color: #fff; padding: .4rem 1rem; font-size: .85rem; border-radius: 6px; }
+.btn-full { width: 100%; display: block; text-align: center; }
+
+/* ── Forms ── */
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: .3rem; font-size: .9rem; color: var(--muted); }
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background: #0d1117;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: .5rem .75rem;
+  font-size: .95rem;
+  outline: none;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  border-color: var(--info);
+}
+.hint { font-size: .78rem; color: var(--muted); }
+
+/* ── Auth ── */
+.auth-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+.auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 420px; }
+.auth-card h1 { text-align: center; margin-bottom: .5rem; }
+.auth-card h2 { text-align: center; color: var(--muted); margin-bottom: 1.5rem; font-weight: 400; }
+.auth-link { text-align: center; margin-top: 1rem; font-size: .9rem; color: var(--muted); }
+.auth-link a { color: #58a6ff; }
+
+/* ── Messages ── */
+.msg { padding: .6rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: .9rem; }
+.msg.hidden { display: none; }
+.msg.success { background: #1c3a2a; color: #3fb950; border: 1px solid #238636; }
+.msg.error   { background: #3a1f1f; color: #f85149; border: 1px solid var(--danger); }
+.msg.info    { background: #1a2a3a; color: #79c0ff; border: 1px solid var(--info); }
+
+/* ── Misc ── */
+.muted { color: var(--muted); font-size: .9rem; }
+.loading-msg { color: var(--muted); font-style: italic; }
+.notice-banner { background: #1f2d1f; border: 1px solid #238636; border-radius: 6px; padding: .6rem 1rem; margin-bottom: 1rem; color: #aef0ae; font-size: .9rem; }
+code { background: #21262d; padding: .1rem .3rem; border-radius: 4px; font-size: .9em; }

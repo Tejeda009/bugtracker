@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | BugTracker</title>
+  <link rel="stylesheet" href="/css/style.css" nonce="<%= nonce %>">
+  <meta name="description" content="THEM?!CTF is the best ctf"> 
+  <!-- TODO: remove test credentials before deploy (admin:admin123) lol -->
+</head>
+<body>
+<div class="auth-container">
+  <div class="auth-card">
+    <h1>🐛 BugTracker</h1>
+    <h2>Sign In</h2>
+    <div id="msg" class="msg hidden"></div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="username" name="username" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" name="password" autocomplete="current-password">
+    </div>
+    <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+    <p class="auth-link">No account? <a href="/register">Register</a></p>
+  </div>
+</div>
+<script nonce="<%= nonce %>">
+document.querySelector('button').addEventListener('click', doLogin);
+async function doLogin() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const resp = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+  });
+  const data = await resp.json();
+  const msg = document.getElementById('msg');
+  if (data.status === 'ok') {
+    window.location.href = '/dashboard';
+  } else {
+    msg.textContent = data.error || 'Login failed';
+    msg.className = 'msg error';
+  }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+</script>
+</body>
+</html>

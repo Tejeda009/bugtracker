@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Submit Report | BugTracker</title>
+  <link rel="stylesheet" href="/css/style.css" nonce="<%= nonce %>">
+  <meta name="description" content="THEM?!CTF is the best ctf"> 
+</head>
+<body>
+<nav class="navbar">
+  <a class="brand" href="/dashboard">🐛 BugTracker</a>
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/submit" class="active">Submit</a>
+    <a href="/profile">Profile</a>
+    <a href="/report">Report to Admin</a>
+    <a href="/about">About</a>
+    <a href="/api/logout">Logout</a>
+  </div>
+</nav>
+<div class="container">
+  <h1>Submit a Bug Report</h1>
+  <div id="msg" class="msg hidden"></div>
+  <div class="form-group">
+    <label>Title</label>
+    <input type="text" id="title" maxlength="200">
+  </div>
+  <div class="form-group">
+    <label>Description</label>
+    <textarea id="body" rows="6" maxlength="2000"></textarea>
+  </div>
+  <div class="form-group">
+    <label>Severity</label>
+    <select id="severity">
+      <option value="LOW">LOW</option>
+      <option value="MEDIUM">MEDIUM</option>
+      <option value="HIGH">HIGH</option>
+      <option value="CRITICAL">CRITICAL</option>
+    </select>
+  </div>
+  <button class="btn btn-primary">Submit Report</button>
+  <p class="muted" style="margin-top:1rem">
+    Public reports require approval from an Editor or Admin before appearing on the dashboard.<br>
+    Send your report URL to an admin via the <a href="/report">Report to Admin</a> page.
+  </p>
+</div>
+<script nonce="<%= nonce %>">
+document.querySelector('button').addEventListener('click', submitReport);
+
+async function submitReport() {
+  const title    = document.getElementById('title').value;
+  const body     = document.getElementById('body').value;
+  const severity = document.getElementById('severity').value;
+  const resp = await fetch('/api/report', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}&severity=${encodeURIComponent(severity)}`
+  });
+  const data = await resp.json();
+  const msg = document.getElementById('msg');
+  if (data.status === 'ok') {
+    msg.textContent = `Report #${data.id} submitted! Awaiting approval.`;
+    msg.className = 'msg success';
+  } else {
+    msg.textContent = data.error || 'Submission failed';
+    msg.className = 'msg error';
+  }
+}
+</script>
+</body>
+</html>
